@@ -1,0 +1,208 @@
+/* ===== Global reset to avoid white edges ===== */
+html, body { margin: 0; padding: 0; }
+body { background: #000; }
+
+/* ===== Solare Home (inspirado en Vivienne Westwood) ===== */
+
+/* Home-specific navbar overrides (do not touch base navbar.css) */
+body.home .card-nav-container {
+  position: fixed;
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92%, 1200px);
+  z-index: 100;
+}
+
+body.home .card-nav {
+  background: rgba(0,0,0,0.18);
+  backdrop-filter: saturate(120%) blur(8px);
+  border: 0; /* avoid bright outline */
+  box-shadow: none; /* remove drop shadow */
+  color: #fff;
+}
+
+body.home .hamburger-line { background-color: rgba(255,255,255,0.9); }
+
+/* Refined Login CTA to blend with hero */
+body.home .card-nav-cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 .9rem;
+  border-radius: .6rem;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.35);
+  backdrop-filter: blur(6px);
+  transition: background .25s ease, border-color .25s ease, color .25s ease;
+}
+body.home .card-nav-cta-button:hover {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.55);
+}
+
+/* When nav opens, keep overlay readable */
+body.home .card-nav.open {
+  background: rgba(0,0,0,0.6);
+}
+
+/* ===== Hero ===== */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  overflow: hidden;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('https://plus.unsplash.com/premium_photo-1664202526559-e21e9c0fb46a?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.02);
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.65) 100%);
+}
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 12vh 1rem 8vh;
+}
+.hero-kicker {
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  font-size: .8rem;
+  opacity: .9;
+}
+.hero-title {
+  font-size: clamp(2.2rem, 6vw, 4.2rem);
+  font-weight: 700;
+  letter-spacing: .02em;
+  margin: .5rem 0 1rem;
+}
+.hero-subtitle {
+  font-size: clamp(1rem, 2.4vw, 1.25rem);
+  max-width: 60ch;
+  margin-inline: auto;
+  opacity: .95;
+}
+.hero-cta {
+  margin-top: 1.75rem;
+  display: inline-flex;
+  gap: .75rem;
+}
+.hero-cta a {
+  display: inline-block;
+  padding: .75rem 1.25rem;
+  border-radius: .5rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.hero-cta .btn-primary { background: #fff; color: #111; }
+.hero-cta .btn-ghost { border: 1px solid rgba(255,255,255,0.75); color: #fff; }
+.hero-cta .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+
+/* ===== Editorial Grid ===== */
+.section { padding: 3.5rem 0; }
+.container { width: min(92%, 1200px); margin-inline: auto; }
+
+.editorial-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .editorial-grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+}
+@media (min-width: 1024px) {
+  .editorial-grid { grid-template-columns: 2fr 1fr; }
+}
+
+.tile {
+  position: relative;
+  min-height: 52vh;
+  border-radius: .75rem;
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+}
+.tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.02);
+}
+.tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 100%);
+}
+.tile-content {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 1.5rem;
+  z-index: 1;
+}
+.tile-kicker { text-transform: uppercase; font-size: .8rem; letter-spacing: .14em; opacity: .95; }
+.tile-title { font-size: clamp(1.5rem, 3.2vw, 2.25rem); font-weight: 700; margin-top: .25rem; }
+.tile-link { display: inline-block; margin-top: .75rem; color: #fff; text-decoration: underline; }
+
+/* Specific tiles */
+.tile-a::before { background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); }
+.tile-b::before { background-image: url('https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=2069&auto=format&fit=crop'); }
+.tile-c::before { background-image: url('https://images.unsplash.com/photo-1699474072277-aeccb6e17263?q=80&w=1161&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); }
+
+/* ===== Collections Row ===== */
+.collections {
+  padding: 3rem 0 4rem;
+}
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+@media (min-width: 768px) { .collections-grid { grid-template-columns: repeat(4, 1fr); gap: 1.25rem; } }
+.collection-card {
+  position: relative;
+  aspect-ratio: 3/4;
+  border-radius: .75rem;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+.collection-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.collection-card .label {
+  position: absolute; inset: auto .75rem .75rem .75rem; background: rgba(0,0,0,.55); color: #fff; padding: .4rem .6rem; border-radius: .4rem; font-size: .85rem; }
+
+/* Footer spacing when using fixed navbar */
+.footer { scroll-margin-top: 80px; }
+
+/* ===== Reveal on Scroll ===== */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+.revealed { opacity: 1; transform: none; }
+
+/* ===== Navbar on scroll (home only) ===== */
+body.home.scrolled .card-nav { 
+  background: rgba(255,255,255,0.9);
+  color: #111;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+body.home.scrolled .hamburger-line { background-color: #111; }
+body.home.scrolled .card-nav-cta-button { 
+  background: #111; 
+  color: #fff; 
+  border-color: #111;
+}
