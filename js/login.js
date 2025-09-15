@@ -10,11 +10,263 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginMessage = document.getElementById('login-message');
     const signupMessage = document.getElementById('signup-message');
 
-    // Mock credentials for demo
-    const MOCK_CREDENTIALS = {
-        email: 'demo@solare.com',
-        password: '123456'
+    // Wait for Supabase client to be available
+    let supabaseReady = false;
+    const checkSupabase = () => {
+        if (window.supabase) {
+            supabaseReady = true;
+            console.log('Supabase client is ready');
+        } else {
+            setTimeout(checkSupabase, 100);
+        }
     };
+    checkSupabase();
+
+    // Authentication functions
+    const auth = {
+        user: null,
+        session: null,
+
+        // Inicializar y verificar sesión existente
+        async init() {
+            try {
+                const { data: { session }, error } = await window.supabase.auth.getSession()
+                if (error) throw error
+                
+                this.session = session
+                this.user = session?.user || null
+                
+                // Escuchar cambios en el estado de autenticación
+                window.supabase.auth.onAuthStateChange((event, session) => {
+                    console.log('Auth state changed:', event)
+                    this.session = session
+                    this.user = session?.user || null
+                    this.handleAuthStateChange(event, session)
+                })
+                
+            } catch (error) {
+                console.error('Error initializing auth:', error)
+            }
+        },
+
+        // Manejar cambios en el estado de autenticación
+        handleAuthStateChange(event, session) {
+            switch (event) {
+                case 'SIGNED_IN':
+                    console.log('User signed in:', session.user)
+                    this.redirectAfterLogin()
+                    break
+                case 'SIGNED_OUT':
+                    console.log('User signed out')
+                    this.redirectAfterLogout()
+                    break
+                case 'TOKEN_REFRESHED':
+                    console.log('Token refreshed')
+                    break
+            }
+        },
+
+        // Iniciar sesión con email y contraseña
+        async signIn(email, password) {
+            try {
+                const { data, error } = await window.supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                })
+
+                if (error) throw error
+
+                return {
+                    success: true,
+                    user: data.user,
+                    session: data.session,
+                    message: 'Inicio de sesión exitoso'
+                }
+            } catch (error) {
+                console.error('Error signing in:', error)
+                return {
+                    success: false,
+                    error: error.message,
+                    message: this.getErrorMessage(error.message)
+                }
+            }
+        },
+
+        // Registrar nuevo usuario
+        async signUp(email, password, userData = {}) {
+            try {
+                const { data, error } = await window.supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            first_name: userData.firstName || '',
+                            last_name: userData.lastName || '',
+                            ...userData
+                        }
+                    }
+                })
+
+                if (error) throw error
+
+                return {
+                    success: true,
+                    user: data.user,
+                    session: data.session,
+                    message: data.user?.email_confirmed_at ? 
+                        'Cuenta creada exitosamente' : 
+                        'Revisa tu email para confirmar tu cuenta'
+                }
+            } catch (error) {
+                console.error('Error signing up:', error)
+                return {
+                    success: false,
+                    error: error.message,
+                    message: this.getErrorMessage(error.message)
+                }
+            }
+        },
+
+        // Cerrar sesión
+        async signOut() {
+            try {
+                const { error } = await window.supabase.auth.signOut()
+                if (error) throw error
+
+                return {
+                    success: true,
+                    message: 'Sesión cerrada exitosamente'
+                }
+            } catch (error) {
+                console.error('Error signing out:', error)
+                return {
+                    success: false,
+                    error: error.message,
+                    message: 'Error al cerrar sesión'
+                }
+            }
+        },
+
+        // Iniciar sesión con Google
+        async signInWithGoogle() {
+            try {
+                const { data, error } = await window.supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: `${window.location.origin}/html/index.html`
+                    }
+                })
+
+                if (error) throw error
+                return { success: true }
+            } catch (error) {
+                console.error('Error signing in with Google:', error)
+                return {
+                    success: false,
+                    error: error.message,
+                    message: 'Error al iniciar sesión con Google'
+                }
+            }
+        },
+
+        // Iniciar sesión con Facebook
+        async signInWithFacebook() {
+            try {
+                const { data, error } = await window.supabase.auth.signInWithOAuth({
+                    provider: 'facebook',
+                    options: {
+                        redirectTo: `${window.location.origin}/html/index.html`
+                    }
+                })
+
+                if (error) throw error
+                return { success: true }
+            } catch (error) {
+                console.error('Error signing in with Facebook:', error)
+                return {
+                    success: false,
+                    error: error.message,
+                    message: 'Error al iniciar sesión con Facebook'
+                }
+            }
+        },
+
+        // Restablecer contraseña
+        async resetPassword(email) {
+            try {
+                const { error } = await window.supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/html/reset-password.html`
+                })
+
+                if (error) throw error
+
+                return {
+                    success: true,
+                    message: 'Se ha enviado un enlace de recuperación a tu email'
+                }
+            } catch (error) {
+                console.error('Error resetting password:', error)
+                return {
+                    success: false,
+                    error: error.message,
+                    message: 'Error al enviar el enlace de recuperación'
+                }
+            }
+        },
+
+        // Obtener usuario actual
+        getCurrentUser() {
+            return this.user
+        },
+
+        // Verificar si el usuario está autenticado
+        isAuthenticated() {
+            return !!this.user && !!this.session
+        },
+
+        // Redireccionar después del login
+        redirectAfterLogin() {
+            if (window.location.pathname.includes('login.html')) {
+                window.location.href = 'index.html'
+            }
+        },
+
+        // Redireccionar después del logout
+        redirectAfterLogout() {
+            const protectedPages = ['dashboard.html', 'profile.html']
+            const currentPage = window.location.pathname.split('/').pop()
+            
+            if (protectedPages.includes(currentPage)) {
+                window.location.href = 'login.html'
+            }
+        },
+
+        // Traducir mensajes de error
+        getErrorMessage(errorMessage) {
+            const errorMessages = {
+                'Invalid login credentials': 'Credenciales de inicio de sesión inválidas',
+                'Email not confirmed': 'Email no confirmado',
+                'User already registered': 'El usuario ya está registrado',
+                'Password should be at least 6 characters': 'La contraseña debe tener al menos 6 caracteres',
+                'Invalid email': 'Email inválido',
+                'Signup requires a valid password': 'El registro requiere una contraseña válida',
+                'Email rate limit exceeded': 'Límite de emails excedido, intenta más tarde',
+                'Too many requests': 'Demasiadas solicitudes, intenta más tarde'
+            }
+
+            return errorMessages[errorMessage] || errorMessage
+        }
+    };
+
+    // Inicializar autenticación cuando Supabase esté listo
+    const initAuth = () => {
+        if (supabaseReady) {
+            auth.init();
+        } else {
+            setTimeout(initAuth, 100);
+        }
+    };
+    initAuth();
 
     // Toggle between login and signup forms
     function showLogin() {
@@ -68,6 +320,11 @@ document.addEventListener('DOMContentLoaded', function() {
     loginFormElement.addEventListener('submit', async function(e) {
         e.preventDefault();
         
+        if (!supabaseReady) {
+            showMessage(loginMessage, 'Sistema de autenticación cargando...');
+            return;
+        }
+        
         const formData = new FormData(loginFormElement);
         const email = formData.get('email');
         const password = formData.get('password');
@@ -86,24 +343,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
         setLoading(submitButton, true, 'Iniciar Sesión');
 
-        // Simulate API call delay
-        setTimeout(() => {
-            if (email === MOCK_CREDENTIALS.email && password === MOCK_CREDENTIALS.password) {
-                showMessage(loginMessage, '¡Login exitoso! Redirigiendo...', 'success');
+        try {
+            const result = await auth.signIn(email, password);
+            
+            if (result.success) {
+                showMessage(loginMessage, result.message, 'success');
                 // Redirect after success message
                 setTimeout(() => {
-                    window.location.href = '../index.html';
+                    window.location.href = 'index.html';
                 }, 1500);
             } else {
-                showMessage(loginMessage, 'Credenciales incorrectas. Intente nuevamente.');
+                showMessage(loginMessage, result.message);
             }
+        } catch (error) {
+            console.error('Login error:', error);
+            showMessage(loginMessage, 'Error al iniciar sesión. Intente nuevamente.');
+        } finally {
             setLoading(submitButton, false, 'Iniciar Sesión');
-        }, 1000);
+        }
     });
 
     // Signup form handler
     signupFormElement.addEventListener('submit', async function(e) {
         e.preventDefault();
+        
+        if (!supabaseReady) {
+            showMessage(signupMessage, 'Sistema de autenticación cargando...');
+            return;
+        }
         
         const formData = new FormData(signupFormElement);
         const firstname = formData.get('firstname');
@@ -126,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (!isValidPassword(password)) {
-            showMessage(signupMessage, 'La contraseña debe tener al menos 8 caracteres.');
+            showMessage(signupMessage, 'La contraseña debe tener al menos 6 caracteres.');
             return;
         }
 
@@ -142,21 +409,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
         setLoading(submitButton, true, 'Crear Cuenta');
 
-        // Simulate API call delay
-        setTimeout(() => {
-            // Simulate successful registration
-            showMessage(signupMessage, '¡Cuenta creada exitosamente! Redirigiendo...', 'success');
+        try {
+            const userData = {
+                firstName: firstname,
+                lastName: lastname
+            };
             
-            // Switch to login form after successful registration
-            setTimeout(() => {
-                showLogin();
-                // Pre-fill email in login form
-                document.getElementById('login-email').value = email;
-                showMessage(loginMessage, 'Cuenta creada. Ahora puede iniciar sesión.', 'success');
-            }, 1500);
+            const result = await auth.signUp(email, password, userData);
             
+            if (result.success) {
+                showMessage(signupMessage, result.message, 'success');
+                
+                // Switch to login form after successful registration
+                setTimeout(() => {
+                    showLogin();
+                    // Pre-fill email in login form
+                    document.getElementById('login-email').value = email;
+                    showMessage(loginMessage, 'Cuenta creada. Ahora puede iniciar sesión.', 'success');
+                }, 2000);
+            } else {
+                showMessage(signupMessage, result.message);
+            }
+        } catch (error) {
+            console.error('Signup error:', error);
+            showMessage(signupMessage, 'Error al crear la cuenta. Intente nuevamente.');
+        } finally {
             setLoading(submitButton, false, 'Crear Cuenta');
-        }, 1000);
+        }
     });
 
     // Clear messages when user starts typing
@@ -174,13 +453,34 @@ document.addEventListener('DOMContentLoaded', function() {
     setupMessageClear(loginFormElement, loginMessage);
     setupMessageClear(signupFormElement, signupMessage);
 
-    // Social button handlers (placeholder functionality)
+    // Social button handlers
     const socialButtons = document.querySelectorAll('.btn-social');
     socialButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
+        button.addEventListener('click', async function(e) {
             e.preventDefault();
-            const provider = this.textContent.trim();
-            alert(`Funcionalidad de ${provider} próximamente disponible.`);
+            
+            if (!supabaseReady) {
+                alert('Sistema de autenticación cargando...');
+                return;
+            }
+            
+            const provider = this.textContent.trim().toLowerCase();
+            
+            try {
+                let result;
+                if (provider === 'google') {
+                    result = await auth.signInWithGoogle();
+                } else if (provider === 'facebook') {
+                    result = await auth.signInWithFacebook();
+                }
+                
+                if (result && !result.success) {
+                    showMessage(loginMessage, result.message);
+                }
+            } catch (error) {
+                console.error(`${provider} login error:`, error);
+                showMessage(loginMessage, `Error al iniciar sesión con ${provider}`);
+            }
         });
     });
 
