@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Cargar navbar y luego inicializar sus eventos
-  fetch('layout/navbar/navbar.html')
+  fetch('../html/navbar.html')
     .then((res) => res.text())
     .then((html) => {
       const navbarContainer = document.getElementById('navbar');
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Cargar script del navbar y luego inicializarlo
       const ensureNavbarScript = () => new Promise((resolve, reject) => {
         if (window.initNavbar) return resolve();
-        const existing = Array.from(document.scripts).find(s => (s.src || '').includes('layout/navbar/navbar.js'));
+        const existing = Array.from(document.scripts).find(s => (s.src || '').includes('./navbar.js'));
         if (existing) {
           existing.addEventListener('load', () => resolve());
           existing.addEventListener('error', reject);
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
         const script = document.createElement('script');
-        script.src = 'layout/navbar/navbar.js';
+        script.src = './navbar.js';
         script.defer = true;
         script.onload = () => { script.dataset.loaded = 'true'; resolve(); };
         script.onerror = reject;
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .catch((err) => console.error('Error cargando navbar:', err));
 
   // Cargar footer
-  fetch('layout/footer/footer.html')
+  fetch('../html/footer.html')
     .then((res) => res.text())
     .then((html) => {
       const footerContainer = document.getElementById('footer');

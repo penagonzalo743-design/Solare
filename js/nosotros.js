@@ -1,7 +1,7 @@
 // Nosotros page functionality
 document.addEventListener('DOMContentLoaded', function() {
     // Load navbar and footer with correct paths for subdirectory
-    fetch('../layout/navbar/navbar.html')
+    fetch('../html/navbar.html')
         .then((res) => res.text())
         .then((html) => {
             const navbarContainer = document.getElementById('navbar');
