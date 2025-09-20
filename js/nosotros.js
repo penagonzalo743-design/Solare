@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch((err) => console.error('Error cargando navbar:', err));
 
     // Load footer
-    fetch('../layout/footer/footer.html')
+    fetch('../html/footer.html')
         .then((res) => res.text())
         .then((html) => {
             const footerContainer = document.getElementById('footer');
